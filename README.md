@@ -1,4 +1,4 @@
-# Tradey — Paper Trading Simulator & Market Education
+# Tradey - Paper Trading Simulator & Market Education
 
 Lightweight paper trading platform built with Node.js, Express, WebSockets, and public market data APIs. Tradey provides live market monitoring, technical indicators, portfolio simulation, and educational content in a single application.
 
