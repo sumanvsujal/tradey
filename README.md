@@ -1,163 +1,82 @@
 # Tradey — Paper Trading Simulator & Market Education
 
-Lightweight, local-first paper trading environment with live price feeds, deterministic technical indicators, and an in-app curriculum for learning trading concepts hands-on.
+Lightweight paper trading platform built with Node.js, Express, WebSockets, and public market data APIs. Tradey provides live market monitoring, technical indicators, portfolio simulation, and educational content in a single application.
 
-Key ideas: zero registration, zero risk, no external accounts — run locally with Node.js and open the UI in your browser.
-
----
-
-## Quick Links
-
-- Live demo: http://localhost:3000 (when server is running)
-- Start (Windows): `start.bat`
-- Start (manual): `node server.js`
+Users can analyze market data, view technical signals, execute simulated trades, and track portfolio performance without creating an account or connecting to a brokerage.
 
 ---
 
 ## Overview
 
-Tradey combines three things in one place: live market data ingestion, rule-based signal generation, and a paper trading interface tied to a short learning curriculum. Users can inspect indicators (RSI/MACD/BB), view signals, and execute simulated trades against live or fallback data.
+Tradey combines live market data, technical analysis, and paper trading into a single application. Market data is fetched from public APIs, processed through technical indicator calculations, and delivered to the frontend through REST APIs and WebSocket updates.
 
-Designed to be simple to run: Node.js (LTS) is required; `node_modules` is bundled so no `npm install` is necessary for a typical zip distribution.
+The platform also includes educational modules covering trading fundamentals, technical indicators, risk management, and market analysis concepts.
 
 ---
 
 ## Highlights
 
-- Live price ingestion from Yahoo Finance (unofficial) and CoinGecko (crypto)
-- WebSocket ticks broadcast every 4 seconds for a live UI experience
-- Deterministic indicators: RSI(14), MACD(12,26), Bollinger Band width (20)
-- Rule-based signal engine producing BUY / HOLD / SELL + confidence score (32–88 clamp)
-- Paper trading wallet with simulated fees and weighted-average position tracking
-- Built-in 9-lesson curriculum, quizzes, and basic achievement/XP mechanics
-- Graceful fallback to generated random-walk histories when upstream data is unavailable
+* Live market data integration using Yahoo Finance and CoinGecko
+* Real-time updates through WebSocket communication
+* Technical indicators including RSI, MACD, and Bollinger Bands
+* Rule-based BUY, HOLD, and SELL signal generation
+* Simulated trading environment with portfolio tracking
+* Virtual wallet with brokerage and transaction cost simulation
+* Educational modules, quizzes, and achievement system
+* Automatic fallback data generation when external APIs are unavailable
 
 ---
 
-## Plain, Smooth Architecture
+## Technical Implementation
 
-Conceptual flow (simple):
-
-1. Server startup runs `fetchAll()` to pull historical and current prices from external APIs.
-2. Per-symbol processing extracts a 65-day close series and computes indicators via pure functions (`rsi()`, `macd()`, `bb()`).
-3. `signal()` scores each symbol and `build()` assembles a market object stored in an in-memory `CACHE`.
-4. The API serves the cached dataset (`/api/markets`, `/api/quote/:sym`) while a `tick()` loop mutates prices slightly and broadcasts minimal updates via WebSocket.
-5. Frontend loads a full dataset on connect, renders charts (Chart.js), subscribes to ticks, and updates the UI and simulated portfolio in real time.
-
-Mermaid overview:
-
-```mermaid
-flowchart LR
-  A["Yahoo Finance, CoinGecko"] --> B["fetchAll()"]
-  B --> C["RSI, MACD, BB"]
-  C --> D["signal(), build()"]
-  D --> E["CACHE"]
-  E --> F["API endpoints"]
-  E --> G["WebSocket ticks"]
-  G --> H["Browser UI"]
-```
-
-This keeps the runtime simple: single Node process, HTTP + WS on the same port, and an in-memory cache feeding a single-page frontend.
+* Express.js backend serving REST APIs and WebSocket connections
+* In-memory caching for low-latency market updates
+* Parallel market data retrieval using Promise.all
+* Technical indicators implemented as pure functions
+* Real-time portfolio valuation using current market prices
+* Single-process architecture with HTTP and WebSocket services on the same port
 
 ---
 
-## Signal Rules (concise)
+## Limitations
 
-Start at 50; adjust by rules and clamp to [32, 88]. Interpretations:
-
-| Condition | Delta |
-|---|---:|
-| RSI < 30 | +20 |
-| RSI < 45 | +10 |
-| RSI > 70 | -20 |
-| RSI > 60 | -10 |
-| MACD bullish | +15 |
-| MACD bearish | -15 |
-| Price > 10-day avg | +10 |
-| Price < 10-day avg | -10 |
-
-Score >= 62 → BUY; <= 44 → SELL; otherwise HOLD. The score is shown as confidence.
-
----
-
-## Run (quickstart)
-
-Requirements: Node.js LTS installed.
-
-Windows: double-click `start.bat` or run in PowerShell:
-
-```powershell
-.\start.bat
-```
-
-Manual:
-
-```bash
-node server.js
-# then open http://localhost:3000
-```
-
-API quick check:
-
-```bash
-curl http://localhost:3000/api/health
-```
-
----
-
-## API Endpoints
-
-- `GET /api/health` — basic server health, symbols, last fetch, uptime
-- `GET /api/markets` — full cached dataset by market
-- `GET /api/quote/:symbol` — single symbol object
-- `GET /api/news` — static news feed
-- `POST /api/refresh` — trigger immediate fetchAll()
-
----
-
-## Project Layout
-
-```
-tradey/
-├─ server.js         # backend: data ingestion, WS, API routes
-├─ public/
-│  └─ index.html     # frontend (single-file SPA)
-├─ node_modules/     # bundled for zip distributions
-├─ package.json
-├─ start.bat
-└─ README.md
-```
-
----
-
-## Limitations & Safety Notes
-
-- No persistent storage: portfolio and XP reset on refresh.
-- Yahoo Finance usage is unofficial and may be rate-limited or change.
-- `/api/refresh` is unauthenticated — avoid rapid calls.
-
-This project is intended for local, educational use only.
+* Portfolio data and progress are stored in memory and reset after application restart
+* Yahoo Finance endpoints are unofficial and may change without notice
+* News content is static and intended for demonstration purposes
+* The forecasting module is heuristic-based and not a trained predictive model
+* The leaderboard uses predefined sample entries
 
 ---
 
 ## Development
 
-- Core functions are pure and easy to unit-test (`rsi`, `macd`, `bb`).
-- To run or debug: start `node server.js` and open the browser at `http://localhost:3000`.
-
-Suggested tests:
+Run the server:
 
 ```bash
-# health check
+node server.js
+```
+
+Open:
+
+```text
+http://localhost:3000
+```
+
+Basic health check:
+
+```bash
 curl http://localhost:3000/api/health
 ```
 
 ---
 
-## License & Contact
+## License
 
-MIT license. Raise issues or PRs on the repository.
+MIT License
 
 ---
 
-If you want, I can open a PR with this README, add badges, or create a `CONTRIBUTING.md` next.
+## Summary
+
+Tradey is a local paper trading platform designed to explore financial analytics, technical analysis, real-time systems, and portfolio simulation. The project integrates live market data, WebSocket communication, trading workflows, and educational content within a lightweight Node.js architecture.
+
