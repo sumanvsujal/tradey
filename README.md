@@ -48,13 +48,13 @@ Mermaid overview:
 
 ```mermaid
 flowchart LR
-  A[Yahoo Finance / CoinGecko] --> B[fetchAll()]
-  B --> C[Indicator functions: rsi, macd, bb]
-  C --> D[signal() -> build()]
-  D --> E[CACHE (in-memory)]
-  E --> F[/api/markets, /api/quote]
-  E --> G[WebSocket ticks (every 4s)]
-  G --> H[Browser UI: charts, markets, trade]
+  A["Yahoo Finance, CoinGecko"] --> B["fetchAll()"]
+  B --> C["RSI, MACD, BB"]
+  C --> D["signal(), build()"]
+  D --> E["CACHE"]
+  E --> F["API endpoints"]
+  E --> G["WebSocket ticks"]
+  G --> H["Browser UI"]
 ```
 
 This keeps the runtime simple: single Node process, HTTP + WS on the same port, and an in-memory cache feeding a single-page frontend.
